@@ -1,0 +1,95 @@
+{
+  "name": "@lpm.dev/neo.is",
+  "version": "1.0.0",
+  "description": "Modern, comprehensive type checking library - TypeScript-first, tree-shakeable, zero dependencies",
+  "keywords": [
+    "type-check",
+    "is-number",
+    "is-string",
+    "is-array",
+    "typeof",
+    "type-guard",
+    "typescript",
+    "validation",
+    "kind-of",
+    "cross-realm"
+  ],
+  "author": "neo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ne-ooo/neo.is"
+  },
+  "bugs": {
+    "url": "https://github.com/ne-ooo/neo.is/issues"
+  },
+  "homepage": "https://github.com/ne-ooo/neo.is#readme",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./primitives": {
+      "types": "./dist/primitives/index.d.ts",
+      "import": "./dist/primitives/index.js",
+      "require": "./dist/primitives/index.cjs"
+    },
+    "./objects": {
+      "types": "./dist/objects/index.d.ts",
+      "import": "./dist/objects/index.js",
+      "require": "./dist/objects/index.cjs"
+    },
+    "./functions": {
+      "types": "./dist/functions/index.d.ts",
+      "import": "./dist/functions/index.js",
+      "require": "./dist/functions/index.cjs"
+    },
+    "./collections": {
+      "types": "./dist/collections/index.d.ts",
+      "import": "./dist/collections/index.js",
+      "require": "./dist/collections/index.cjs"
+    },
+    "./numbers": {
+      "types": "./dist/numbers/index.d.ts",
+      "import": "./dist/numbers/index.js",
+      "require": "./dist/numbers/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    ".lpm",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "bench": "vitest bench",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "prepublishOnly": "npm run typecheck && npm run build && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/ui": "^2.0.0",
+    "is-number": "^7.0.0",
+    "kind-of": "^6.0.3",
+    "tsup": "^8.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

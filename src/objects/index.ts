@@ -1,0 +1,10 @@
+// Object type checks
+export { isArray } from './array.js'
+export { isObject } from './object.js'
+export { isPlainObject } from './plain-object.js'
+export { isDate } from './date.js'
+export { isRegExp } from './regexp.js'
+export { isError } from './error.js'
+export { isMap } from './map.js'
+export { isSet } from './set.js'
+export { isWeakMap, isWeakSet } from './weakmap.js'
