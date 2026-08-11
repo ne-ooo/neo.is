@@ -1,8 +1,9 @@
 /**
  * Cross-realm safe Object.prototype.toString
  *
- * Works across iframes, workers, and different realms where
- * instanceof checks fail but toString remains reliable.
+ * Works across iframes, workers, and different realms. Custom
+ * Symbol.toStringTag values can change this descriptive tag, so do not use it
+ * as a security or validation boundary. Use a dedicated predicate instead.
  *
  * @param value - Value to get string tag for
  * @returns String tag like '[object Array]'
@@ -13,11 +14,18 @@
  * toString(null)         // '[object Null]'
  */
 export function toString(value: unknown): string {
-  return Object.prototype.toString.call(value)
+  try {
+    return Object.prototype.toString.call(value)
+  } catch {
+    return '[object Object]'
+  }
 }
 
 /**
- * Extract type from toString result
+ * Extract a descriptive type from the toString result
+ *
+ * Custom Symbol.toStringTag values can change the result. Use getType() or a
+ * dedicated predicate when the value is untrusted.
  *
  * @param value - Value to get type for
  * @returns Type string like 'Array', 'Date', 'Null'

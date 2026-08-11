@@ -27,6 +27,19 @@ describe('getType', () => {
     expect(getType(new WeakMap())).toBe('weakmap')
     expect(getType(new WeakSet())).toBe('weakset')
     expect(getType(Promise.resolve())).toBe('promise')
+    expect(getType({ then() {} })).toBe('promise')
+    expect(getType(Object.create(null))).toBe('object')
+  })
+
+  it('handles an inaccessible then property conservatively', () => {
+    const value = Object.defineProperty({}, 'then', {
+      get() {
+        throw new Error('then should not escape')
+      },
+    })
+
+    expect(() => getType(value)).not.toThrow()
+    expect(getType(value)).toBe('object')
   })
 
   it('should return correct type for functions', () => {
@@ -40,5 +53,6 @@ describe('getType', () => {
     expect(getType(new Int8Array())).toBe('int8array')
     expect(getType(new Uint8Array())).toBe('uint8array')
     expect(getType(new Float32Array())).toBe('float32array')
+    expect(getType(new DataView(new ArrayBuffer(1)))).toBe('object')
   })
 })

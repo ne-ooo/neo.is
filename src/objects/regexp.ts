@@ -1,4 +1,4 @@
-import { toString } from '../utils/to-string.js'
+import { hasRegExpBrand } from '../utils/brands.js'
 
 /**
  * Check if value is a RegExp (cross-realm safe)
@@ -12,5 +12,5 @@ import { toString } from '../utils/to-string.js'
  * isRegExp('test')          // false
  */
 export function isRegExp(value: unknown): value is RegExp {
-  return toString(value) === '[object RegExp]'
+  return hasRegExpBrand(value)
 }

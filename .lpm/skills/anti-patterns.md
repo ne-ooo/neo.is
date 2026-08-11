@@ -110,10 +110,13 @@ if (isPromise(value)) {
 Correct:
 
 ```typescript
-// isPromise checks for .then method (duck-typing)
+// isPromise checks for a callable .then property (duck-typing)
 isPromise(Promise.resolve())    // true — real Promise
 isPromise({ then: () => {} })   // true — thenable
 isPromise(async () => {})       // false — async function, not a promise
+
+// The narrowed type is Thenable, not Promise.
+// Do not assume .catch() or .finally() exists.
 
 // If you need to check for actual Promise instances:
 value instanceof Promise        // strict, but not cross-realm safe
@@ -124,7 +127,10 @@ if (isPromise(value)) {
 }
 ```
 
-`isPromise` uses duck-typing: it checks if the value is an object with a `.then` method. This matches the Promises/A+ spec where any thenable is interoperable with Promise. If you need strict Promise-only detection, use `instanceof Promise` (but this breaks across realms).
+`isPromise` uses duck-typing: it checks if an object or function has a callable
+`.then` property. It narrows to the minimal `Thenable` contract, not to a full
+`Promise`. If you need strict same-realm Promise detection, use
+`instanceof Promise`.
 
 Source: `src/functions/promise.ts` — checks for `.then` method
 

@@ -1,4 +1,4 @@
-import { getTag } from '../utils/to-string.js'
+import { hasAsyncFunctionBrand } from '../utils/brands.js'
 
 /**
  * Check if value is an async function
@@ -12,6 +12,6 @@ import { getTag } from '../utils/to-string.js'
  */
 export function isAsyncFunction(
   value: unknown
-): value is (...args: unknown[]) => Promise<unknown> {
-  return getTag(value) === 'AsyncFunction'
+): value is (...args: never[]) => Promise<unknown> {
+  return hasAsyncFunctionBrand(value)
 }

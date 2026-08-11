@@ -1,21 +1,50 @@
 # Performance Benchmarks - @lpm.dev/neo.is
 
+> The first table is the current post-hardening snapshot. The library
+> comparisons that follow are historical. Run `lpm run bench` for results on
+> your own runtime and hardware.
+
 This document contains comprehensive benchmark results comparing `@lpm.dev/neo.is` against popular type-checking libraries.
 
-## Summary
+## Current Hardened Hot Paths (2026-08-08)
+
+Measured with Node.js v26.5.0, Vitest v3.2.7, and an Apple M5 Pro on macOS
+(Darwin 25.5.0). The baseline was captured immediately before this performance
+pass in the same workspace.
+
+| Path | Hardened baseline | Optimized | Change |
+|------|-------------------:|----------:|-------:|
+| `isPlainObject({})` | 9.80M ops/s | 43.20M ops/s | 4.41x faster |
+| `isEmpty({})` | 5.45M ops/s | 15.48M ops/s | 2.84x faster |
+| `isEmpty(new Set())` | 0.26M ops/s | 25.16M ops/s | 96.2x faster |
+| `getType({})` | 7.81M ops/s | 24.78M ops/s | 3.17x faster |
+| `getType(/regexp/)` | 0.37M ops/s | 15.83M ops/s | 42.8x faster |
+| `getType(new Map())` | 0.19M ops/s | 15.93M ops/s | 83.8x faster |
+| `getType(new Set())` | 0.12M ops/s | 15.66M ops/s | 130.5x faster |
+
+The hardened `getType(new Date())` path measured 15.71M ops/s after the fast
+path, compared with 16.81M ops/s before this pass. This remaining 6.5% trade-off
+keeps intrinsic brand validation and cross-realm support. Direct branded
+predicates remain fast: `isMap()` measured 22.48M ops/s, `isSet()` 22.03M ops/s,
+and `isTypedArray()` 21.65M ops/s.
+
+These are microbenchmarks, not latency guarantees. Compare changes on the same
+machine, runtime, dependency lockfile, and benchmark command.
+
+## Historical Comparison Summary
 
 **neo.is consistently outperforms existing libraries**:
 - ✅ **~2x faster than is-number** across all test cases
 - ✅ **~2x faster than kind-of** for primitives
 - ✅ **Competitive or faster** for all object types
 - ✅ **19-20M ops/sec** for primitive checks (typeof baseline)
-- ✅ **12-19M ops/sec** for object checks (toString baseline)
+- ✅ **12-19M ops/sec** in the historical object-check snapshot
 
-## Benchmark Environment
+## Historical Benchmark Environment
 
 - **Platform**: macOS (Darwin 25.3.0)
 - **Node.js**: v18+
-- **Test Framework**: Vitest v2.1.9
+- **Test Framework**: Vitest v3.2.7
 - **CPU**: Apple Silicon / Intel (varies by machine)
 - **Iterations**: Millions of operations per test for statistical significance
 
@@ -102,9 +131,9 @@ For cases where you need string coercion (like is-number's default behavior):
 - No unnecessary object creation
 
 **Why competitive for objects?**
-- Both use `Object.prototype.toString.call()` (same underlying approach)
-- Similar performance characteristics
-- neo.is adds TypeScript type guards with minimal overhead
+- neo.is now uses intrinsic brand checks that reject forged object tags
+- The historical comparison predates that security hardening
+- Run the current suite before using these numbers for a release decision
 
 ## Performance Baselines
 
@@ -120,7 +149,7 @@ These benchmarks establish baseline performance for neo.is type checks:
 
 **Average**: **19.5M ops/sec** - Extremely fast, approaching the theoretical limit of `typeof` checks.
 
-### Objects (toString baseline)
+### Objects (historical baseline)
 
 | Check | ops/sec | Performance |
 |-------|---------|-------------|
@@ -133,7 +162,7 @@ These benchmarks establish baseline performance for neo.is type checks:
 **Why the performance difference?**
 - `isArray()` uses native `Array.isArray()` (highly optimized)
 - `isPlainObject()` requires prototype chain inspection (additional overhead)
-- `isDate()` uses `toString.call()` with string comparison
+- `isDate()` now invokes the intrinsic `Date.prototype.getTime` brand check
 
 ### Functions
 
@@ -154,7 +183,7 @@ These benchmarks establish baseline performance for neo.is type checks:
 
 **Why the difference?**
 - Arrays: Simple `.length` check
-- Objects: Requires `Object.keys()` and length check (additional overhead)
+- Objects: Requires plain-object validation and `Reflect.ownKeys()`
 
 ## Performance Summary
 
@@ -180,9 +209,9 @@ These benchmarks establish baseline performance for neo.is type checks:
 
 | Library | Primary Use Case | neo.is Advantage | Bundle Size Advantage |
 |---------|------------------|------------------|----------------------|
-| **is-number** | Number validation | **1.8-2.6x faster** ✅ | **99.8% smaller** (1.65 KB vs 9.62 KB) ✅ |
-| **kind-of** | Type detection | **~2x faster** (primitives) ✅ | **89% smaller** (1.65 KB vs 15 KB) ✅ |
-| **Zod** | Schema validation | Different use case | **97% smaller** (1.65 KB vs 60 KB) ✅ |
+| **is-number** | Number validation | **1.8-2.6x faster** ✅ | **~72% smaller** (~2.7 KB vs 9.62 KB) ✅ |
+| **kind-of** | Type detection | **~2x faster** (primitives) ✅ | **~82% smaller** (~2.7 KB vs 15 KB) ✅ |
+| **Zod** | Schema validation | Different use case | **~95% smaller** (~2.7 KB vs 60 KB) ✅ |
 
 ## Optimization Strategies
 
@@ -210,7 +239,7 @@ These benchmarks establish baseline performance for neo.is type checks:
 4. **Native API Usage**
    - `Array.isArray()` for arrays (highly optimized)
    - `Number.isNaN()`, `Number.isFinite()` for number checks
-   - `Object.prototype.toString.call()` only when necessary
+   - Intrinsic built-in brand checks for untrusted objects
 
 5. **No String Coercion by Default**
    - Avoids expensive string → number conversions
@@ -255,7 +284,7 @@ Scenario: Real-time form validation on input change (60 times/second).
 | is-number | ~0.006ms | Negligible |
 | kind-of | ~0.005ms | Negligible |
 
-**Verdict**: All libraries are fast enough for real-time validation. neo.is wins on bundle size (1.65 KB vs 9-15 KB).
+**Verdict**: All libraries are fast enough for real-time validation. neo.is has a smaller bundle (~2.7 KB vs 9-15 KB).
 
 ## Running Benchmarks Yourself
 
@@ -268,7 +297,7 @@ cd neo.is
 npm install
 
 # Run benchmarks
-npm run bench
+lpm run bench
 ```
 
 **Note**: Benchmarks are an experimental feature in Vitest and may have breaking changes.
@@ -310,7 +339,7 @@ npm run bench
 ✅ **Production-ready** for high-performance applications
 
 **Combined with**:
-- 1.65 KB gzipped bundle (89-99% smaller than alternatives)
+- ~2.7 KB gzipped bundle
 - Full TypeScript type guards
 - Tree-shakeable architecture
 - Zero dependencies

@@ -10,6 +10,9 @@
  * isFunction(async () => {})        // true (async functions are functions)
  * isFunction(class {})              // true (classes are functions)
  */
+// The broad Function type is intentional because typeof also accepts
+// construct-only classes.
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export function isFunction(value: unknown): value is Function {
   return typeof value === 'function'
 }

@@ -52,7 +52,11 @@ describe('isArrayLike', () => {
     expect(isArrayLike({ length: 3, 0: 'a', 1: 'b', 2: 'c' })).toBe(true)
   })
   it('accepts arguments object', () => {
-    function getArgs() { return arguments }
+    function getArgs() {
+      // This test intentionally creates the special arguments object.
+      // eslint-disable-next-line prefer-rest-params
+      return arguments
+    }
     expect(isArrayLike(getArgs(1, 2, 3))).toBe(true)
   })
   it('rejects plain object without length', () => {

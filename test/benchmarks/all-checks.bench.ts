@@ -8,6 +8,9 @@ import {
   isDate,
   isFunction,
   isEmpty,
+  isMap,
+  isSet,
+  isTypedArray,
 } from '../../src/index.js'
 
 describe('Type Check Performance Baseline', () => {
@@ -25,7 +28,7 @@ describe('Type Check Performance Baseline', () => {
     })
   })
 
-  describe('Objects (toString baseline)', () => {
+  describe('Objects (intrinsic brand baseline)', () => {
     const arr = [1, 2, 3]
     const obj = { a: 1 }
     const date = new Date()
@@ -54,6 +57,8 @@ describe('Type Check Performance Baseline', () => {
   describe('Collections', () => {
     const emptyArr: unknown[] = []
     const emptyObj = {}
+    const emptyMap = new Map()
+    const emptySet = new Set()
 
     bench('isEmpty([])', () => {
       isEmpty(emptyArr)
@@ -61,6 +66,37 @@ describe('Type Check Performance Baseline', () => {
 
     bench('isEmpty({})', () => {
       isEmpty(emptyObj)
+    })
+
+    bench('isEmpty(new Map())', () => {
+      isEmpty(emptyMap)
+    })
+
+    bench('isEmpty(new Set())', () => {
+      isEmpty(emptySet)
+    })
+  })
+
+  describe('Branded objects', () => {
+    const map = new Map()
+    const set = new Set()
+    const typedArray = new Uint8Array(1)
+    const plainObject = {}
+
+    bench('isMap(new Map())', () => {
+      isMap(map)
+    })
+
+    bench('isSet(new Set())', () => {
+      isSet(set)
+    })
+
+    bench('isTypedArray(new Uint8Array())', () => {
+      isTypedArray(typedArray)
+    })
+
+    bench('isTypedArray({})', () => {
+      isTypedArray(plainObject)
     })
   })
 })

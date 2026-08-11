@@ -1,4 +1,4 @@
-import { toString } from '../utils/to-string.js'
+import { hasErrorBrand } from '../utils/brands.js'
 
 /**
  * Check if value is an Error (cross-realm safe)
@@ -12,10 +12,5 @@ import { toString } from '../utils/to-string.js'
  * isError('error')          // false
  */
 export function isError(value: unknown): value is Error {
-  const tag = toString(value)
-  return (
-    tag === '[object Error]' ||
-    tag === '[object DOMException]' ||
-    (value instanceof Error)
-  )
+  return hasErrorBrand(value)
 }

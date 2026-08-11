@@ -1,5 +1,5 @@
 // Export types
-export type { TypeGuard, TypeString, TypedArray } from './types.js'
+export type { Thenable, TypeGuard, TypeString, TypedArray } from './types.js'
 
 // Utilities
 export { toString, getTag } from './utils/to-string.js'
