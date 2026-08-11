@@ -98,4 +98,7 @@ describe('isTypedArray (generic check)', () => {
   it('rejects plain object', () => {
     expect(isTypedArray({})).toBe(false)
   })
+  it('rejects DataView', () => {
+    expect(isTypedArray(new DataView(new ArrayBuffer(1)))).toBe(false)
+  })
 })

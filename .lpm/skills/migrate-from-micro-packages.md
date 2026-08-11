@@ -15,12 +15,12 @@ globs:
 
 neo.is replaces 20+ fragmented type-checking packages with a single, tree-shakeable library:
 
-- **1.65 KB gzipped** — smaller than most individual packages combined
+- **~2.7 KB gzipped** — smaller than most individual packages combined
 - **TypeScript type guards** — every check narrows the type (micro-packages don't)
-- **Tree-shakeable** — each check is ~50-100 bytes, import only what you use
+- **Tree-shakeable** — a primitive check is approximately 70 bytes; import only what you use
 - **Zero dependencies** — no transitive dependency chains
 - **Cross-realm safe** — works across iframes, workers, VM contexts
-- **2x faster** — 19.6M ops/sec vs is-number's 9.6M ops/sec
+- **Benchmarked** — run `lpm run bench` on your target runtime
 
 ## Consolidating Imports
 
@@ -193,7 +193,7 @@ if (isNumber(value)) {
 }
 ```
 
-This works for all checks:
+Predicates narrow only to the type information checked at runtime:
 
 ```typescript
 import { isString, isArray, isPlainObject, isDate, isMap } from '@lpm.dev/neo.is'
@@ -202,8 +202,8 @@ function process(value: unknown) {
   if (isString(value)) {
     value.toUpperCase()        // string methods available
   }
-  if (isArray<number>(value)) {
-    value.reduce((a, b) => a + b) // number[] methods available
+  if (isArray(value) && value.every(isNumber)) {
+    value.reduce((a, b) => a + b) // number[] only after element validation
   }
   if (isPlainObject(value)) {
     Object.keys(value)          // Record<string, unknown> methods available
@@ -211,8 +211,8 @@ function process(value: unknown) {
   if (isDate(value)) {
     value.getFullYear()         // Date methods available
   }
-  if (isMap<string, number>(value)) {
-    value.get('key')            // Map<string, number> methods available
+  if (isMap(value)) {
+    value.get('key')            // unknown until the entry value is validated
   }
 }
 ```
@@ -222,7 +222,7 @@ function process(value: unknown) {
 For maximum tree-shaking, use category subpaths:
 
 ```typescript
-// Only what you need — each check is ~50-100 bytes
+// Only what you need — a primitive check is approximately 70 bytes
 import { isNumber, isString } from '@lpm.dev/neo.is/primitives'
 import { isPlainObject, isArray } from '@lpm.dev/neo.is/objects'
 import { isFunction, isPromise } from '@lpm.dev/neo.is/functions'

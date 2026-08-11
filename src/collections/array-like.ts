@@ -10,9 +10,7 @@
  * isArrayLike({ length: 0 }) // true (has length property)
  * isArrayLike({})            // false
  */
-export function isArrayLike<T = unknown>(
-  value: unknown
-): value is ArrayLike<T> {
+export function isArrayLike(value: unknown): value is ArrayLike<unknown> {
   if (value === null || value === undefined) {
     return false
   }
@@ -26,6 +24,10 @@ export function isArrayLike<T = unknown>(
     return false
   }
 
-  const length = (value as { length?: unknown }).length
-  return typeof length === 'number' && length >= 0 && Number.isSafeInteger(length)
+  try {
+    const length = (value as { length?: unknown }).length
+    return typeof length === 'number' && length >= 0 && Number.isSafeInteger(length)
+  } catch {
+    return false
+  }
 }

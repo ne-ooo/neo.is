@@ -1,4 +1,4 @@
-import { toString } from '../utils/to-string.js'
+import { hasDateBrand } from '../utils/brands.js'
 
 /**
  * Check if value is a Date (cross-realm safe)
@@ -11,5 +11,5 @@ import { toString } from '../utils/to-string.js'
  * isDate('2024-01-01')      // false
  */
 export function isDate(value: unknown): value is Date {
-  return toString(value) === '[object Date]'
+  return hasDateBrand(value)
 }

@@ -1,4 +1,4 @@
-import { toString } from '../utils/to-string.js'
+import { hasSetBrand } from '../utils/brands.js'
 
 /**
  * Check if value is a Set (cross-realm safe)
@@ -10,6 +10,6 @@ import { toString } from '../utils/to-string.js'
  * isSet(new Set())          // true
  * isSet([])                 // false
  */
-export function isSet<T = unknown>(value: unknown): value is Set<T> {
-  return toString(value) === '[object Set]'
+export function isSet(value: unknown): value is Set<unknown> {
+  return hasSetBrand(value)
 }

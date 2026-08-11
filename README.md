@@ -7,13 +7,13 @@
 **Solves the micro-dependency crisis** - Replaces 20+ fragmented type-checking packages (is-number, is-string, is-array, kind-of, etc.) with a single, comprehensive solution.
 
 - **🎯 Comprehensive**: 30+ type checks in one package
-- **📦 Tiny Bundle**: 1.65 KB gzipped (45% under 3 KB target!)
-- **🌲 Tree-Shakeable**: Import only what you need (~50-100 bytes per check)
+- **📦 Tiny Bundle**: ~2.7 KB gzipped (below the 3 KB target)
+- **🌲 Tree-Shakeable**: Import only what you need (a primitive check is ~70 bytes)
 - **🔒 TypeScript Type Guards**: Static type narrowing at compile-time
 - **🌍 Cross-Realm Safe**: Works across iframes, workers, and realms
 - **⚡ Fast**: Optimized performance for common checks
 - **0️⃣ Zero Dependencies**: No external runtime dependencies
-- **✅ 120+ Tests**: Comprehensive test coverage
+- **✅ 240+ Tests**: Comprehensive test coverage
 
 ## The Problem
 
@@ -132,7 +132,7 @@ import {
   isAsyncFunction, // Async functions
   isGeneratorFunction, // Generator functions
   isGenerator, // Generator instances
-  isPromise, // Promises
+  isPromise, // Promises and thenables
 } from "@lpm.dev/neo.is";
 
 // Examples
@@ -140,6 +140,7 @@ isFunction(() => {}); // true
 isAsyncFunction(async () => {}); // true
 isGeneratorFunction(function* () {}); // true
 isPromise(Promise.resolve()); // true
+isPromise({ then: () => {} }); // true (thenable)
 ```
 
 ### Collection Checks
@@ -248,7 +249,7 @@ isPositiveNumber(-42); // false
 Import only what you need for optimal bundle size:
 
 ```typescript
-// Import single check (~50-100 bytes)
+// Import a primitive check (~70 bytes)
 import { isNumber } from "@lpm.dev/neo.is";
 
 // Import multiple (~150-300 bytes)
@@ -258,13 +259,14 @@ import { isNumber, isString, isArray } from "@lpm.dev/neo.is";
 import { isNumber, isNaN, isFinite } from "@lpm.dev/neo.is/numbers";
 import { isArray, isPlainObject } from "@lpm.dev/neo.is/objects";
 
-// Import all (~1.65 KB gzipped)
+// Import all (~2.7 KB gzipped)
 import * as is from "@lpm.dev/neo.is";
 ```
 
 ## TypeScript Type Guards
 
-All type checks are TypeScript type guards that narrow types at compile-time:
+Predicates narrow only to types that their runtime checks can prove. Collection
+contents and object property shapes remain `unknown` until separately validated:
 
 ```typescript
 function processValue(value: unknown) {
@@ -274,12 +276,12 @@ function processValue(value: unknown) {
   }
 
   if (isArray(value)) {
-    // TypeScript knows value is array here!
+    // TypeScript knows value is unknown[] here.
     console.log(value.length);
   }
 
   if (isPlainObject(value)) {
-    // TypeScript knows value is object here!
+    // TypeScript knows value is Record<PropertyKey, unknown> here.
     console.log(Object.keys(value));
   }
 }
@@ -294,7 +296,7 @@ Works across iframes, workers, and different realms:
 const iframeArray = iframe.contentWindow.Array.of(1, 2, 3);
 iframeArray instanceof Array; // false (different realm!)
 
-// neo.is works correctly (uses Object.prototype.toString.call)
+// neo.is works correctly (uses intrinsic, realm-independent brand checks)
 isArray(iframeArray); // true ✓
 ```
 
@@ -375,7 +377,14 @@ import {
   isDate,
 } from "@lpm.dev/neo.is";
 
-function validateUser(data: unknown) {
+interface User {
+  id: number;
+  email: string;
+  tags: string[];
+  created: Date;
+}
+
+function validateUser(data: unknown): User {
   if (!isPlainObject(data)) {
     throw new Error("Invalid user data");
   }
@@ -388,7 +397,7 @@ function validateUser(data: unknown) {
     throw new Error("Invalid email");
   }
 
-  if (!isArray(data.tags)) {
+  if (!isArray(data.tags) || !data.tags.every(isString)) {
     throw new Error("Invalid tags");
   }
 
@@ -396,7 +405,12 @@ function validateUser(data: unknown) {
     throw new Error("Invalid created date");
   }
 
-  return data; // TypeScript knows the shape now
+  return {
+    id: data.id,
+    email: data.email,
+    tags: data.tags,
+    created: data.created,
+  };
 }
 ```
 
@@ -427,7 +441,7 @@ function validateFormData(formData: Record<string, unknown>) {
 
 | Package             | Bundle Size (gzipped) | Tree-shakeable | Type Guards |
 | ------------------- | --------------------- | -------------- | ----------- |
-| **@lpm.dev/neo.is** | **1.65 KB**           | ✅ Yes         | ✅ Yes      |
+| **@lpm.dev/neo.is** | **~2.7 KB**           | ✅ Yes         | ✅ Yes      |
 | is-number           | 9.62 KB (package)     | ❌ No          | ❌ No       |
 | kind-of             | ~15 KB                | ❌ No          | ❌ No       |
 | Zod                 | ~60 KB                | ❌ Limited     | ✅ Yes      |
@@ -436,9 +450,9 @@ function validateFormData(formData: Record<string, unknown>) {
 
 Optimized for common use cases:
 
-- Primitive checks: 100M+ ops/sec (typeof baseline)
-- Object checks: 50M+ ops/sec (cross-realm toString)
-- Complex checks: 20M+ ops/sec (isPlainObject)
+- Primitive checks use direct `typeof` and `Number` built-ins.
+- Object checks use cross-realm intrinsic brand checks.
+- Run `lpm run bench` to measure performance on your target runtime.
 
 ## Browser Support
 

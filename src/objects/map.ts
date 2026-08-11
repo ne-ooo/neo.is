@@ -1,4 +1,4 @@
-import { toString } from '../utils/to-string.js'
+import { hasMapBrand } from '../utils/brands.js'
 
 /**
  * Check if value is a Map (cross-realm safe)
@@ -10,8 +10,6 @@ import { toString } from '../utils/to-string.js'
  * isMap(new Map())          // true
  * isMap({})                 // false
  */
-export function isMap<K = unknown, V = unknown>(
-  value: unknown
-): value is Map<K, V> {
-  return toString(value) === '[object Map]'
+export function isMap(value: unknown): value is Map<unknown, unknown> {
+  return hasMapBrand(value)
 }

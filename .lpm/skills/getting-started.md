@@ -13,7 +13,7 @@ globs:
 
 ## Overview
 
-neo.is is a comprehensive type-checking library. 1.65 KB gzipped, 46+ type guards with TypeScript narrowing, zero dependencies, tree-shakeable, cross-realm safe. Replaces 20+ micro-packages (is-number, is-string, kind-of, is-plain-object, etc.) with a single import.
+neo.is is a comprehensive type-checking library. It is approximately 2.7 KB gzipped, with 46+ type guards, TypeScript narrowing, zero dependencies, tree-shaking, and cross-realm safety. It replaces 20+ micro-packages (is-number, is-string, kind-of, is-plain-object, etc.) with a single import.
 
 ## Quick Start
 
@@ -108,14 +108,18 @@ isObject([])                       // true (arrays are objects)
 isObject(null)                     // false
 ```
 
-### Generics
+### Sound Collection Narrowing
 
 ```typescript
-isArray<number>(value)              // narrows to number[]
-isMap<string, number>(value)        // narrows to Map<string, number>
-isSet<string>(value)                // narrows to Set<string>
-isPlainObject<{ id: number }>(value) // narrows to { id: number }
+if (isArray(value) && value.every(isNumber)) {
+  // value is number[] only after every element is checked
+  value.reduce((sum, item) => sum + item, 0)
+}
 ```
+
+`isArray`, `isMap`, `isSet`, and `isPlainObject` do not accept caller-selected
+generic types. They narrow contents and properties to `unknown` because a brand
+check cannot validate those values.
 
 ## Functions
 
@@ -132,7 +136,7 @@ isFunction(() => {})           // true
 isFunction(async () => {})     // true (async is still a function)
 isAsyncFunction(async () => {})// true
 isPromise(Promise.resolve())   // true
-isPromise({ then: () => {} })  // true (thenable — duck-typed!)
+isPromise({ then: () => {} })  // true (thenable — narrows to Thenable)
 ```
 
 ## Collections
@@ -223,6 +227,9 @@ getTag(new Date())   // 'Date'
 getTag(null)         // 'Null'
 ```
 
+`getTag()` is descriptive only. A custom `Symbol.toStringTag` can change its
+result. Use `getType()` or a dedicated predicate for untrusted values.
+
 ### `createTypeGuard()` — Custom Type Guards
 
 ```typescript
@@ -272,11 +279,13 @@ import { isPositive, isNegative } from '@lpm.dev/neo.is/numbers'
 import { isNumber, isString, isPlainObject } from '@lpm.dev/neo.is'
 ```
 
-Each check is ~50-100 bytes when tree-shaken.
+Primitive checks are approximately 70 bytes when tree-shaken. Complex checks include only the intrinsic brand logic that they use.
 
 ## Cross-Realm Safety
 
-All checks work across iframes, Web Workers, and VM contexts. neo.is uses `Object.prototype.toString.call()` and `Array.isArray()` instead of `instanceof`, which breaks across realms:
+Built-in checks work across iframes, Web Workers, and VM contexts. neo.is uses
+realm-independent intrinsic brand checks and `Array.isArray()` instead of
+realm-local `instanceof` checks:
 
 ```typescript
 // instanceof fails across realms
@@ -290,7 +299,7 @@ isArray(iframeArray)          // true
 
 neo.is and Zod are **complementary**, not competing:
 
-- **neo.is** — fast type detection: "Is this a number?" (1.65 KB, 19M+ ops/sec)
+- **neo.is** — fast type detection: "Is this a number?" (~2.7 KB)
 - **Zod** — schema validation: "Does this match my shape with constraints?" (~60 KB)
 
 Use neo.is for guard clauses, type narrowing, and input triage. Use Zod for structured validation with error messages, constraints, and transforms.

@@ -1,26 +1,17 @@
-import { toString } from '../utils/to-string.js'
+import { hasThenableShape } from '../utils/brands.js'
+import type { Thenable } from '../types.js'
 
 /**
- * Check if value is a Promise
+ * Check if value is a Promise or thenable
  *
  * @param value - Value to check
- * @returns true if value is a Promise
+ * @returns true if value has a callable then property
  *
  * @example
  * isPromise(Promise.resolve())      // true
  * isPromise({ then: () => {} })     // true (thenable)
  * isPromise(async () => {})         // false (function, not promise)
  */
-export function isPromise<T = unknown>(value: unknown): value is Promise<T> {
-  // Check for native Promise
-  if (toString(value) === '[object Promise]') {
-    return true
-  }
-
-  // Check for thenable (has .then method)
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    typeof (value as { then?: unknown }).then === 'function'
-  )
+export function isPromise(value: unknown): value is Thenable {
+  return hasThenableShape(value)
 }

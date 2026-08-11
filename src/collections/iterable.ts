@@ -11,10 +11,14 @@
  * isIterable('')             // true (strings are iterable)
  * isIterable({})             // false
  */
-export function isIterable<T = unknown>(value: unknown): value is Iterable<T> {
+export function isIterable(value: unknown): value is Iterable<unknown> {
   if (value === null || value === undefined) {
     return false
   }
 
-  return typeof (value as { [Symbol.iterator]?: unknown })[Symbol.iterator] === 'function'
+  try {
+    return typeof (value as { [Symbol.iterator]?: unknown })[Symbol.iterator] === 'function'
+  } catch {
+    return false
+  }
 }

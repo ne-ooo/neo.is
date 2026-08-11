@@ -1,4 +1,4 @@
-import { toString } from '../utils/to-string.js'
+import { hasWeakMapBrand, hasWeakSetBrand } from '../utils/brands.js'
 
 /**
  * Check if value is a WeakMap (cross-realm safe)
@@ -10,10 +10,8 @@ import { toString } from '../utils/to-string.js'
  * isWeakMap(new WeakMap())  // true
  * isWeakMap(new Map())      // false
  */
-export function isWeakMap<K extends object = object, V = unknown>(
-  value: unknown
-): value is WeakMap<K, V> {
-  return toString(value) === '[object WeakMap]'
+export function isWeakMap(value: unknown): value is WeakMap<object, unknown> {
+  return hasWeakMapBrand(value)
 }
 
 /**
@@ -26,8 +24,6 @@ export function isWeakMap<K extends object = object, V = unknown>(
  * isWeakSet(new WeakSet())  // true
  * isWeakSet(new Set())      // false
  */
-export function isWeakSet<T extends object = object>(
-  value: unknown
-): value is WeakSet<T> {
-  return toString(value) === '[object WeakSet]'
+export function isWeakSet(value: unknown): value is WeakSet<object> {
+  return hasWeakSetBrand(value)
 }

@@ -4,6 +4,15 @@
 export type TypeGuard<T> = (value: unknown) => value is T
 
 /**
+ * Minimal structural contract checked by isPromise().
+ *
+ * A thenable does not necessarily provide Promise methods such as catch() or finally().
+ */
+export interface Thenable {
+  then: (...args: unknown[]) => unknown
+}
+
+/**
  * Type string returned by getType()
  */
 export type TypeString =

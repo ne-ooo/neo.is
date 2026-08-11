@@ -1,4 +1,5 @@
-import { toString } from '../utils/to-string.js'
+import { getCollectionSize } from '../utils/brands.js'
+import { isPlainObject } from '../objects/plain-object.js'
 
 /**
  * Check if value is empty
@@ -22,21 +23,23 @@ export function isEmpty(value: unknown): boolean {
     return true
   }
 
-  // Arrays and strings
-  if (Array.isArray(value) || typeof value === 'string') {
-    return value.length === 0
-  }
+  try {
+    // Arrays and strings
+    if (Array.isArray(value) || typeof value === 'string') {
+      return value.length === 0
+    }
 
-  // Maps and Sets
-  const tag = toString(value)
-  if (tag === '[object Map]' || tag === '[object Set]') {
-    return (value as Map<unknown, unknown> | Set<unknown>).size === 0
-  }
+    // Plain objects
+    if (isPlainObject(value)) {
+      return Reflect.ownKeys(value).length === 0
+    }
 
-  // Plain objects
-  if (tag === '[object Object]') {
-    return Object.keys(value as object).length === 0
-  }
+    const collectionSize = getCollectionSize(value)
+    if (collectionSize !== undefined) return collectionSize === 0
 
-  return false
+    return false
+  } catch {
+    // An uninspectable proxy must not be treated as empty.
+    return false
+  }
 }
