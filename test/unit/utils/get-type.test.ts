@@ -47,6 +47,15 @@ describe('getType', () => {
     expect(getType(function () {})).toBe('function')
     expect(getType(async () => {})).toBe('asyncfunction')
     expect(getType(function* () {})).toBe('generatorfunction')
+    expect(getType(async function* () {})).toBe('function')
+
+    const alteredAsync = async () => 1
+    Object.setPrototypeOf(alteredAsync, Function.prototype)
+    expect(getType(alteredAsync)).toBe('asyncfunction')
+
+    const alteredGenerator = function* () {}
+    Object.setPrototypeOf(alteredGenerator, Function.prototype)
+    expect(getType(alteredGenerator)).toBe('generatorfunction')
   })
 
   it('should return correct type for typed arrays', () => {
@@ -54,5 +63,31 @@ describe('getType', () => {
     expect(getType(new Uint8Array())).toBe('uint8array')
     expect(getType(new Float32Array())).toBe('float32array')
     expect(getType(new DataView(new ArrayBuffer(1)))).toBe('object')
+  })
+
+  it('returns object quickly for unsupported built-ins and classes', () => {
+    class Example {}
+
+    expect(getType(new ArrayBuffer(1))).toBe('object')
+    expect(getType(new URL('https://example.com'))).toBe('object')
+    expect(getType(new Example())).toBe('object')
+  })
+
+  it('keeps structural fallbacks for values with custom prototypes', () => {
+    class Thenable {
+      then() {}
+    }
+    class GeneratorLike {
+      next() {}
+      return() {}
+      throw() {}
+      [Symbol.iterator]() {
+        return this
+      }
+    }
+
+    expect(getType(new Thenable())).toBe('promise')
+    expect(getType(Object.create({ then() {} }))).toBe('promise')
+    expect(getType(new GeneratorLike())).toBe('generator')
   })
 })

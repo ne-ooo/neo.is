@@ -1,6 +1,6 @@
 ---
 name: getting-started
-description: How to use neo.is — 46+ type guards with TypeScript narrowing organized by category (primitives, objects, functions, collections, typed arrays, number validators), utilities (getType, getTag, createTypeGuard), subpath imports for tree-shaking, cross-realm safety, neo.is vs Zod positioning
+description: How to use neo.is — 46 type guards with TypeScript narrowing, utility functions, subpath imports, cross-realm safety, and neo.is vs Zod positioning
 version: "1.0.0"
 globs:
   - "**/*.ts"
@@ -13,7 +13,9 @@ globs:
 
 ## Overview
 
-neo.is is a comprehensive type-checking library. It is approximately 2.7 KB gzipped, with 46+ type guards, TypeScript narrowing, zero dependencies, tree-shaking, and cross-realm safety. It replaces 20+ micro-packages (is-number, is-string, kind-of, is-plain-object, etc.) with a single import.
+neo.is contains 46 type guards and a small set of utility functions. The package has zero runtime dependencies and supports tree-shaking.
+
+The package also supports values from other JavaScript realms. The complete package is approximately 3.5 KB after gzip compression.
 
 ## Quick Start
 
@@ -36,7 +38,7 @@ function processInput(data: unknown) {
 }
 ```
 
-Every function is a TypeScript type guard — after the check, the compiler narrows the type automatically.
+The 46 type guards narrow checked values. `isEmpty()` and the utility functions do not narrow values.
 
 ## Primitives
 
@@ -77,11 +79,11 @@ isNil(0)            // false
 |----------|-----|-----|
 | API response fields | `isNumber()` | JSON numbers are `number` type |
 | Form input / query params | `isNumeric()` | Values are always strings |
-| TypeScript narrowing | `isNumber()` | Only `isNumber` narrows to `number` |
+| TypeScript narrowing | `isNumber()` | It narrows the value to `number` |
 | Math operations | `isNumber()` | Need an actual number |
 | CSV/config parsing | `isNumeric()` | Values may be strings |
 
-`isNumber()` returns `value is number` (type guard). `isNumeric()` returns `boolean` (can't narrow — value might be string or number).
+`isNumber()` narrows a value to `number`. `isNumeric()` narrows a value to `number | string`.
 
 ## Objects
 
@@ -107,6 +109,14 @@ isPlainObject([])                  // false (array, not plain object)
 isObject([])                       // true (arrays are objects)
 isObject(null)                     // false
 ```
+
+`isError()` uses a native Error brand check when the runtime provides one.
+Older browsers use `structuredClone()`. This fallback returns `false` when an
+Error has a non-cloneable `cause` value.
+
+Browser runtimes compile an expression to distinguish parenthesized async
+arrows from methods named `async`. The check returns `false` if CSP blocks the
+compilation and no native function-kind check is available.
 
 ### Sound Collection Narrowing
 
@@ -217,6 +227,9 @@ getType(async () => {})  // 'asyncfunction'
 
 Returns a `TypeString` union type — all possible values are typed.
 
+`getType()` uses current prototype and tag hints. An unrelated replacement
+prototype can hide a built-in. Use a dedicated predicate after prototype mutation.
+
 ### `getTag()` — Raw Object Tag
 
 ```typescript
@@ -299,7 +312,7 @@ isArray(iframeArray)          // true
 
 neo.is and Zod are **complementary**, not competing:
 
-- **neo.is** — fast type detection: "Is this a number?" (~2.7 KB)
+- **neo.is** — fast type detection: "Is this a number?" (~3.5 KB)
 - **Zod** — schema validation: "Does this match my shape with constraints?" (~60 KB)
 
 Use neo.is for guard clauses, type narrowing, and input triage. Use Zod for structured validation with error messages, constraints, and transforms.

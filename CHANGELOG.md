@@ -9,19 +9,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Changed
 
 - Added a same-realm prototype fast path to `isPlainObject()` while preserving cross-realm validation.
-- Added validated prototype and object-tag hints to `getType()` before its full intrinsic fallback.
+- Added validated prototype hints to `getType()` before its full intrinsic fallback.
 - Added an `ArrayBuffer.isView()` prefilter and switch-based typed-array dispatch.
 - Removed exception-driven Map/Set selection from `isEmpty()`; the Set path improved from 0.26M to 25.16M ops/s in the local benchmark.
 - Added benchmark coverage for branded collections, typed arrays, and collection emptiness.
 
 ### Fixed
 
+- Added separate TypeScript declarations for ESM and CommonJS consumers.
+- Made `Thenable` compatible with real promises without permitting unchecked arguments.
+- Rejected forged constructors and cyclic prototype chains in runtime checks.
+- Preserved dedicated brand checks when code replaces a built-in prototype, including with `Object.prototype` or `null`.
+- Added native and structured-clone Error brand checks. The legacy browser fallback now rejects stateful tag forgeries.
+- Replaced the incomplete async source lexer with native Node checks and a fail-closed browser expression check.
+- Removed exception-driven negative paths from branded-object checks and unknown-object classification.
+- Prevented ordinary functions from passing async-function or generator-function checks after prototype changes.
+- Conservatively rejected bound async and generator functions because JavaScript hides their bound target brand.
+- Added `Float16Array` detection on runtimes that provide the standardized API.
+- Added narrowing for `isNaN()`, `isFinite()`, and `isNumeric()`.
+- Scoped the unaffected `esbuild` version to compatible build-tool dependency paths.
 - Made `getType()` return only `TypeString` values for custom `Symbol.toStringTag` objects.
 - Classified `Infinity` as `number` and generator instances as `generator`.
 - Replaced spoofable string-tag checks with cross-realm intrinsic brand checks.
 - Made `isPlainObject()` work with object literals from other realms.
 - Changed collection predicates to narrow unchecked contents to `unknown`.
 - Changed `isPromise()` to narrow to the minimal `Thenable` contract.
+- Kept `Thenable` await-compatible and added older-lib fallbacks for Float16Array and WeakKey types.
 - Added an LPM lockfile, security audit, verification, and package smoke-test gates.
 - Preserved single-predicate tree-shaking with lazy intrinsic setup and bundle-size gates.
 - Made public predicates and raw tag utilities return conservative results for hostile proxies and throwing accessors.

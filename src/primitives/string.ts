@@ -32,7 +32,7 @@ export function isString(value: unknown): value is string {
  * isNumeric(NaN)             // false
  * isNumeric(Infinity)        // false
  */
-export function isNumeric(value: unknown): boolean {
+export function isNumeric(value: unknown): value is number | string {
   // Handle actual numbers first (must be finite)
   if (typeof value === 'number') {
     return value - value === 0 // Excludes NaN and Infinity

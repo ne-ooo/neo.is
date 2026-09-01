@@ -26,19 +26,9 @@ const TYPED_ARRAY_TYPES: Record<TypedArrayName, TypeString> = {
   Uint32Array: 'uint32array',
   Float32Array: 'float32array',
   Float64Array: 'float64array',
+  Float16Array: 'float16array',
   BigInt64Array: 'bigint64array',
   BigUint64Array: 'biguint64array',
-}
-
-let objectToString: typeof Object.prototype.toString | undefined
-
-function getObjectTagHint(value: object): string | undefined {
-  objectToString ??= Object.prototype.toString
-  try {
-    return objectToString.call(value)
-  } catch {
-    return undefined
-  }
 }
 
 function getLocalHintedType(value: object): TypeString | undefined {
@@ -65,31 +55,6 @@ function getLocalHintedType(value: object): TypeString | undefined {
     case WeakSet.prototype:
       return hasWeakSetBrand(value) ? 'weakset' : undefined
     case Promise.prototype:
-      return hasThenableShape(value) ? 'promise' : undefined
-    default:
-      return undefined
-  }
-}
-
-function getHintedType(value: object, tag: string): TypeString | undefined {
-  switch (tag) {
-    case '[object Date]':
-      return hasDateBrand(value) ? 'date' : undefined
-    case '[object RegExp]':
-      return hasRegExpBrand(value) ? 'regexp' : undefined
-    case '[object Error]':
-      return hasErrorBrand(value) ? 'error' : undefined
-    case '[object Map]':
-      return hasMapBrand(value) ? 'map' : undefined
-    case '[object Set]':
-      return hasSetBrand(value) ? 'set' : undefined
-    case '[object WeakMap]':
-      return hasWeakMapBrand(value) ? 'weakmap' : undefined
-    case '[object WeakSet]':
-      return hasWeakSetBrand(value) ? 'weakset' : undefined
-    case '[object Generator]':
-      return hasGeneratorShape(value) ? 'generator' : undefined
-    case '[object Promise]':
       return hasThenableShape(value) ? 'promise' : undefined
     default:
       return undefined
@@ -156,13 +121,31 @@ export function getType(value: unknown): TypeString {
   const localHintedType = getLocalHintedType(value as object)
   if (localHintedType !== undefined) return localHintedType
 
-  const tag = getObjectTagHint(value as object)
-  if (tag !== undefined) {
-    const hintedType = getHintedType(value as object, tag)
-    if (hintedType !== undefined) return hintedType
+  // Structural contracts remain valid for class instances and objects with
+  // custom prototypes. Run them before the unsupported-class fast path.
+  if (hasGeneratorShape(value)) return 'generator'
+  if (hasThenableShape(value)) return 'promise'
+
+  try {
+    const object = value as object
+    const prototype = Object.getPrototypeOf(object)
+
+    if (
+      prototype !== null &&
+      Object.getPrototypeOf(prototype) === Object.prototype
+    ) {
+      const constructor = Object.getOwnPropertyDescriptor(
+        prototype,
+        'constructor'
+      )?.value
+      if (typeof constructor === 'function') return 'object'
+    }
+  } catch {
+    return 'object'
   }
 
-  // Fall back to every intrinsic check when Symbol.toStringTag was forged.
+  // Fall back to intrinsic checks for branded values with foreign or changed
+  // prototypes.
   if (hasDateBrand(value)) return 'date'
   if (hasRegExpBrand(value)) return 'regexp'
   if (hasErrorBrand(value)) return 'error'
@@ -170,7 +153,5 @@ export function getType(value: unknown): TypeString {
   if (hasSetBrand(value)) return 'set'
   if (hasWeakMapBrand(value)) return 'weakmap'
   if (hasWeakSetBrand(value)) return 'weakset'
-  if (hasGeneratorShape(value)) return 'generator'
-  if (hasThenableShape(value)) return 'promise'
   return 'object'
 }

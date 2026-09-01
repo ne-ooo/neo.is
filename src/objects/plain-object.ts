@@ -24,6 +24,14 @@ function getFunctionToString(): typeof Function.prototype.toString {
   return intrinsicFunctionToString
 }
 
+function hasNoStringTag(value: object, prototype: object | null): boolean {
+  return (
+    getOwnPropertyDescriptor(value, Symbol.toStringTag) === undefined &&
+    (prototype === null ||
+      getOwnPropertyDescriptor(prototype, Symbol.toStringTag) === undefined)
+  )
+}
+
 function getObjectConstructorSource(): string {
   objectConstructorSource ??= getFunctionToString().call(Object)
   return objectConstructorSource
@@ -40,7 +48,8 @@ function getLocalObjectPrototype(): object {
  * A plain object is:
  * - Created with {} or new Object()
  * - Has Object.prototype or null as prototype
- * - NOT an array, date, regexp, or other built-in object type
+ * A value whose prototype is deliberately replaced can be classified according
+ * to its replacement prototype because JavaScript does not expose its origin.
  *
  * @param value - Value to check
  * @returns true if value is a plain object
@@ -60,8 +69,10 @@ export function isPlainObject(
 
   try {
     const prototype = getPrototypeOf(value)
-    if (prototype === null) return true
-    if (prototype === getLocalObjectPrototype()) return true
+    if (prototype === null) return hasNoStringTag(value, prototype)
+    if (prototype === getLocalObjectPrototype()) {
+      return hasNoStringTag(value, prototype)
+    }
 
     // Every realm has a different Object.prototype identity. Its own
     // constructor still has the same intrinsic source and its prototype is null.
@@ -69,6 +80,8 @@ export function isPlainObject(
     const constructor = getOwnPropertyDescriptor(prototype, 'constructor')?.value
     return (
       typeof constructor === 'function' &&
+      getOwnPropertyDescriptor(constructor, 'prototype')?.value === prototype &&
+      hasNoStringTag(value, prototype) &&
       getFunctionToString().call(constructor) === getObjectConstructorSource()
     )
   } catch {

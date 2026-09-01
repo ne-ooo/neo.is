@@ -90,7 +90,7 @@ const fullBundle = await bundleVirtual(`
 const fullGzipBytes = gzipSync(fullBundle, { level: 9 }).byteLength
 
 assert.ok(
-  fullGzipBytes <= 3 * 1024,
+  fullGzipBytes <= 3.6 * 1024,
   `Full bundle grew to ${fullGzipBytes} gzipped bytes`
 )
 

@@ -1,5 +1,12 @@
 // Export types
-export type { Thenable, TypeGuard, TypeString, TypedArray } from './types.js'
+export type {
+  Float16ArrayValue,
+  Float16ArrayFallback,
+  Thenable,
+  TypeGuard,
+  TypeString,
+  TypedArray,
+} from './types.js'
 
 // Utilities
 export { toString, getTag } from './utils/to-string.js'
@@ -55,6 +62,7 @@ export {
   isUint32Array,
   isFloat32Array,
   isFloat64Array,
+  isFloat16Array,
   isBigInt64Array,
   isBigUint64Array,
 } from './typed-arrays/specific.js'

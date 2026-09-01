@@ -41,8 +41,16 @@ describe('Type Check Performance Baseline', () => {
       isPlainObject(obj)
     })
 
+    bench('isPlainObject(fresh {})', () => {
+      isPlainObject({})
+    })
+
     bench('isDate(new Date())', () => {
       isDate(date)
+    })
+
+    bench('isDate({})', () => {
+      isDate(obj)
     })
   })
 
@@ -68,6 +76,10 @@ describe('Type Check Performance Baseline', () => {
       isEmpty(emptyObj)
     })
 
+    bench('isEmpty(fresh {})', () => {
+      isEmpty({})
+    })
+
     bench('isEmpty(new Map())', () => {
       isEmpty(emptyMap)
     })
@@ -87,8 +99,20 @@ describe('Type Check Performance Baseline', () => {
       isMap(map)
     })
 
+    bench('isMap({})', () => {
+      isMap(plainObject)
+    })
+
+    bench('isMap(fresh {})', () => {
+      isMap({})
+    })
+
     bench('isSet(new Set())', () => {
       isSet(set)
+    })
+
+    bench('isSet({})', () => {
+      isSet(plainObject)
     })
 
     bench('isTypedArray(new Uint8Array())', () => {

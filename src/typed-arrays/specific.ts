@@ -1,4 +1,5 @@
 import { getTypedArrayName } from '../utils/brands.js'
+import type { Float16ArrayValue } from '../types.js'
 
 /**
  * Check if value is an Int8Array
@@ -61,6 +62,11 @@ export function isFloat32Array(value: unknown): value is Float32Array {
  */
 export function isFloat64Array(value: unknown): value is Float64Array {
   return getTypedArrayName(value) === 'Float64Array'
+}
+
+/** Check if value is a Float16Array when the runtime provides it. */
+export function isFloat16Array(value: unknown): value is Float16ArrayValue {
+  return getTypedArrayName(value) === 'Float16Array'
 }
 
 /**

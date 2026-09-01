@@ -83,6 +83,18 @@ describe('isError', () => {
   })
 })
 
+describe('negative brand cache', () => {
+  it('keeps repeated negative checks false', () => {
+    const value = {}
+    const checks = [isDate, isRegExp, isMap, isSet, isWeakMap, isWeakSet]
+
+    for (const check of checks) {
+      expect(check(value)).toBe(false)
+      expect(check(value)).toBe(false)
+    }
+  })
+})
+
 describe('isMap', () => {
   it('should return true for maps', () => {
     expect(isMap(new Map())).toBe(true)

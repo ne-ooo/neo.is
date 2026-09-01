@@ -9,10 +9,17 @@ import {
   isUint32Array,
   isFloat32Array,
   isFloat64Array,
+  isFloat16Array,
   isBigInt64Array,
   isBigUint64Array,
   isTypedArray,
 } from '../../../src/index.js'
+
+const Float16ArrayConstructor = (
+  globalThis as unknown as {
+    Float16Array?: new (length: number) => object
+  }
+).Float16Array
 
 describe('isInt8Array', () => {
   it('accepts Int8Array', () => { expect(isInt8Array(new Int8Array(0))).toBe(true) })
@@ -70,6 +77,17 @@ describe('isFloat64Array', () => {
   it('rejects plain array', () => { expect(isFloat64Array([])).toBe(false) })
 })
 
+describe('isFloat16Array', () => {
+  it('accepts Float16Array when the runtime provides it', () => {
+    if (Float16ArrayConstructor === undefined) return
+    expect(isFloat16Array(new Float16ArrayConstructor(0))).toBe(true)
+  })
+
+  it('rejects other typed arrays', () => {
+    expect(isFloat16Array(new Float32Array(0))).toBe(false)
+  })
+})
+
 describe('isBigInt64Array', () => {
   it('accepts BigInt64Array', () => { expect(isBigInt64Array(new BigInt64Array(0))).toBe(true) })
   it('rejects BigUint64Array', () => { expect(isBigInt64Array(new BigUint64Array(0))).toBe(false) })
@@ -87,6 +105,9 @@ describe('isTypedArray (generic check)', () => {
     expect(isTypedArray(new Int8Array(0))).toBe(true)
     expect(isTypedArray(new Uint8Array(0))).toBe(true)
     expect(isTypedArray(new Float64Array(0))).toBe(true)
+    if (Float16ArrayConstructor !== undefined) {
+      expect(isTypedArray(new Float16ArrayConstructor(0))).toBe(true)
+    }
     expect(isTypedArray(new BigInt64Array(0))).toBe(true)
   })
   it('rejects plain array', () => {

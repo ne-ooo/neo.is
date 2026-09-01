@@ -1,8 +1,11 @@
 import {
   isArray,
   isArrayLike,
+  isFinite,
   isIterable,
   isMap,
+  isNaN,
+  isNumeric,
   isPlainObject,
   isPromise,
   isSet,
@@ -38,12 +41,12 @@ if (isSet(value)) {
 }
 
 if (isWeakMap(value)) {
-  const weakMap: WeakMap<object, unknown> = value
+  const weakMap: WeakMap<WeakKey, unknown> = value
   void weakMap
 }
 
 if (isWeakSet(value)) {
-  const weakSet: WeakSet<object> = value
+  const weakSet: WeakSet<WeakKey> = value
   void weakSet
 }
 
@@ -63,7 +66,27 @@ if (isPromise(value)) {
 
   // @ts-expect-error Thenables do not necessarily implement Promise.catch().
   value.catch(() => {})
+
+  async function consumeThenable() {
+    await value
+  }
+  void consumeThenable
 }
+
+if (isNaN(value) || isFinite(value)) {
+  const number: number = value
+  void number
+}
+
+if (isNumeric(value)) {
+  const numeric: number | string = value
+  void numeric
+}
+
+const realPromise: Thenable = Promise.resolve(1)
+realPromise.then()
+// @ts-expect-error Runtime checking proves only that then is callable.
+realPromise.then(123)
 
 // @ts-expect-error Caller-selected element types are intentionally unsupported.
 isArray<string>(value)

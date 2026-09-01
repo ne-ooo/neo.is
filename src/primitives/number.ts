@@ -37,7 +37,7 @@ export function isNumber(value: unknown): value is number {
  * isNaN('not a number')  // false (string, not NaN)
  * isNumber(NaN)          // false (NaN is not a number)
  */
-export function isNaN(value: unknown): boolean {
+export function isNaN(value: unknown): value is number {
   // Use Number.isNaN (ES6) which doesn't coerce
   return Number.isNaN(value)
 }
@@ -53,7 +53,7 @@ export function isNaN(value: unknown): boolean {
  * isFinite(Infinity)     // false
  * isFinite(-Infinity)    // false
  */
-export function isFinite(value: unknown): boolean {
+export function isFinite(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value)
 }
 

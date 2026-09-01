@@ -28,34 +28,64 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./primitives": {
-      "types": "./dist/primitives/index.d.ts",
-      "import": "./dist/primitives/index.js",
-      "require": "./dist/primitives/index.cjs"
+      "import": {
+        "types": "./dist/primitives/index.d.ts",
+        "default": "./dist/primitives/index.js"
+      },
+      "require": {
+        "types": "./dist/primitives/index.d.cts",
+        "default": "./dist/primitives/index.cjs"
+      }
     },
     "./objects": {
-      "types": "./dist/objects/index.d.ts",
-      "import": "./dist/objects/index.js",
-      "require": "./dist/objects/index.cjs"
+      "import": {
+        "types": "./dist/objects/index.d.ts",
+        "default": "./dist/objects/index.js"
+      },
+      "require": {
+        "types": "./dist/objects/index.d.cts",
+        "default": "./dist/objects/index.cjs"
+      }
     },
     "./functions": {
-      "types": "./dist/functions/index.d.ts",
-      "import": "./dist/functions/index.js",
-      "require": "./dist/functions/index.cjs"
+      "import": {
+        "types": "./dist/functions/index.d.ts",
+        "default": "./dist/functions/index.js"
+      },
+      "require": {
+        "types": "./dist/functions/index.d.cts",
+        "default": "./dist/functions/index.cjs"
+      }
     },
     "./collections": {
-      "types": "./dist/collections/index.d.ts",
-      "import": "./dist/collections/index.js",
-      "require": "./dist/collections/index.cjs"
+      "import": {
+        "types": "./dist/collections/index.d.ts",
+        "default": "./dist/collections/index.js"
+      },
+      "require": {
+        "types": "./dist/collections/index.d.cts",
+        "default": "./dist/collections/index.cjs"
+      }
     },
     "./numbers": {
-      "types": "./dist/numbers/index.d.ts",
-      "import": "./dist/numbers/index.js",
-      "require": "./dist/numbers/index.cjs"
+      "import": {
+        "types": "./dist/numbers/index.d.ts",
+        "default": "./dist/numbers/index.js"
+      },
+      "require": {
+        "types": "./dist/numbers/index.d.cts",
+        "default": "./dist/numbers/index.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -74,13 +104,13 @@
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:types": "tsc --noEmit -p tsconfig.types.json",
-    "test:package": "node test/package-smoke.mjs",
+    "test:package": "tsc --noEmit -p tsconfig.package.json && node test/package-smoke.mjs && node test/runtime-compat.mjs",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "bench": "vitest bench --run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "security:audit": "lpm audit --level high --fail-on vuln",
+    "security:audit": "lpm audit --level info --fail-on vuln",
     "verify": "lpm run typecheck && lpm run lint && lpm run test:types && lpm run test:coverage && lpm run build && lpm run test:package",
     "publish:check": "lpm run security:audit && lpm run verify && lpm publish --check --yes",
     "publish:lpm": "lpm run security:audit && lpm run verify && lpm publish --yes"
@@ -97,6 +127,12 @@
     "typescript-eslint": "^8.0.0",
     "vite": "^6.4.3",
     "vitest": "3.2.7"
+  },
+  "lpm": {
+    "overrides": {
+      "tsup>esbuild": "0.27.2",
+      "bundle-require>esbuild": "0.27.2"
+    }
   },
   "engines": {
     "node": ">=18.0.0"

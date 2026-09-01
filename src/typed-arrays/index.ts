@@ -10,6 +10,7 @@ export {
   isUint32Array,
   isFloat32Array,
   isFloat64Array,
+  isFloat16Array,
   isBigInt64Array,
   isBigUint64Array,
 } from './specific.js'

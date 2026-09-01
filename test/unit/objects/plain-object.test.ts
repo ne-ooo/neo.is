@@ -39,4 +39,23 @@ describe('isPlainObject', () => {
     class TestClass {}
     expect(isPlainObject(new TestClass())).toBe(false)
   })
+
+  it('rejects crafted Object constructor prototypes', () => {
+    const prototype = Object.create(null) as Record<PropertyKey, unknown>
+    Object.defineProperty(prototype, 'constructor', { value: Object })
+    prototype['inherited'] = true
+
+    expect(isPlainObject(Object.create(prototype))).toBe(false)
+  })
+
+  it('classifies a value by a deliberately replaced Object prototype', () => {
+    const value = new Map([['neo', 1]])
+    Object.setPrototypeOf(value, Object.prototype)
+
+    expect(isPlainObject(value)).toBe(true)
+  })
+
+  it('returns a conservative result for custom string tags', () => {
+    expect(isPlainObject({ [Symbol.toStringTag]: 'Object' })).toBe(false)
+  })
 })

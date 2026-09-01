@@ -15,8 +15,8 @@ globs:
 
 neo.is replaces 20+ fragmented type-checking packages with a single, tree-shakeable library:
 
-- **~2.7 KB gzipped** — smaller than most individual packages combined
-- **TypeScript type guards** — every check narrows the type (micro-packages don't)
+- **~3.5 KB gzipped** — smaller than most individual packages combined
+- **TypeScript type guards** — 46 checks narrow values
 - **Tree-shakeable** — a primitive check is approximately 70 bytes; import only what you use
 - **Zero dependencies** — no transitive dependency chains
 - **Cross-realm safe** — works across iframes, workers, VM contexts
@@ -177,7 +177,7 @@ const type = getType(value)  // TypeString union type
 
 ## TypeScript Type Guards (Major Upgrade)
 
-The biggest advantage over micro-packages: **every neo.is check is a TypeScript type guard**.
+The package provides 46 type guards. `isEmpty()` and utility functions return information without narrowing the input value.
 
 ```typescript
 // Micro-packages: no type narrowing

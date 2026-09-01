@@ -1,6 +1,6 @@
 ---
 name: anti-patterns
-description: Common mistakes when using neo.is — isNumber excludes NaN and Infinity, isNumber vs isNumeric on form input (no coercion vs coercion), isPromise matches thenables not just Promise, isPlainObject rejects class instances, isEmpty treats null/undefined as empty, isArrayLike matches strings, isZero matches negative zero, isObject includes arrays, isNumeric is not a type guard
+description: Common mistakes when using neo.is — finite-number checks, numeric strings, thenables, plain objects, empty values, array-like strings, signed zero, and object checks
 version: "1.0.0"
 globs:
   - "**/*.ts"
@@ -172,6 +172,9 @@ value instanceof User              // true for User instances
 
 `isPlainObject` checks the prototype chain: the prototype must be either `null` or `Object.prototype`. Class instances, arrays, dates, and other built-in objects have different prototypes and return false.
 
+The check uses the current prototype. A value can become plain if code replaces
+its prototype with `Object.prototype`.
+
 Source: `src/objects/plain-object.ts` — `Object.getPrototypeOf(value)` check
 
 ### [HIGH] `isEmpty` treats `null` and `undefined` as empty
@@ -337,15 +340,15 @@ JavaScript's `===` operator treats `0` and `-0` as equal, and `isZero` follows t
 
 Source: `src/numbers/validators.ts` — uses equality check
 
-### [MEDIUM] `isNumeric` is NOT a TypeScript type guard
+### [MEDIUM] `isNumeric` does not narrow to `number`
 
 Wrong:
 
 ```typescript
-// AI expects isNumeric to narrow the type
+// This code expects isNumeric to narrow the value to number.
 function double(value: unknown) {
   if (isNumeric(value)) {
-    return value * 2  // TypeScript error! value is still `unknown`
+    return value * 2  // TypeScript error: value is `number | string`.
   }
 }
 ```
@@ -353,14 +356,14 @@ function double(value: unknown) {
 Correct:
 
 ```typescript
-// isNumeric returns boolean — value could be string or number
+// isNumeric narrows the value to number | string.
 function double(value: unknown) {
   if (isNumeric(value)) {
     return Number(value) * 2  // Explicitly convert
   }
 }
 
-// isNumber IS a type guard — narrows to number
+// isNumber narrows the value to number.
 function double(value: unknown) {
   if (isNumber(value)) {
     return value * 2  // Works — TypeScript knows value is number
@@ -368,6 +371,6 @@ function double(value: unknown) {
 }
 ```
 
-`isNumeric()` can't be a type guard because the value might be either a `string` (`'42'`) or a `number` (`42`) — TypeScript can't narrow to a single type. `isNumber()` returns `value is number` and narrows correctly.
+`isNumeric()` narrows a value to `number | string`. Convert the value before arithmetic, or use `isNumber()` to require a number.
 
-Source: `src/primitives/string.ts` — `isNumeric` return type is `boolean`, not `value is number`
+Source: `src/primitives/string.ts` — `isNumeric` returns `value is number | string`

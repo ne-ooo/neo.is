@@ -209,9 +209,9 @@ These benchmarks establish baseline performance for neo.is type checks:
 
 | Library | Primary Use Case | neo.is Advantage | Bundle Size Advantage |
 |---------|------------------|------------------|----------------------|
-| **is-number** | Number validation | **1.8-2.6x faster** ✅ | **~72% smaller** (~2.7 KB vs 9.62 KB) ✅ |
-| **kind-of** | Type detection | **~2x faster** (primitives) ✅ | **~82% smaller** (~2.7 KB vs 15 KB) ✅ |
-| **Zod** | Schema validation | Different use case | **~95% smaller** (~2.7 KB vs 60 KB) ✅ |
+| **is-number** | Number validation | **1.8-2.6x faster** ✅ | **~64% smaller** (~3.5 KB vs 9.62 KB) ✅ |
+| **kind-of** | Type detection | **~2x faster** (primitives) ✅ | **~77% smaller** (~3.5 KB vs 15 KB) ✅ |
+| **Zod** | Schema validation | Different use case | **~94% smaller** (~3.5 KB vs 60 KB) ✅ |
 
 ## Optimization Strategies
 
@@ -284,7 +284,7 @@ Scenario: Real-time form validation on input change (60 times/second).
 | is-number | ~0.006ms | Negligible |
 | kind-of | ~0.005ms | Negligible |
 
-**Verdict**: All libraries are fast enough for real-time validation. neo.is has a smaller bundle (~2.7 KB vs 9-15 KB).
+**Verdict**: All libraries are fast enough for real-time validation. neo.is has a smaller bundle (~3.5 KB vs 9-15 KB).
 
 ## Running Benchmarks Yourself
 
@@ -339,7 +339,7 @@ lpm run bench
 ✅ **Production-ready** for high-performance applications
 
 **Combined with**:
-- ~2.7 KB gzipped bundle
+- ~3.5 KB gzipped bundle
 - Full TypeScript type guards
 - Tree-shakeable architecture
 - Zero dependencies

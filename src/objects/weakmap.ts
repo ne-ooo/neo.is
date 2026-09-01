@@ -10,7 +10,7 @@ import { hasWeakMapBrand, hasWeakSetBrand } from '../utils/brands.js'
  * isWeakMap(new WeakMap())  // true
  * isWeakMap(new Map())      // false
  */
-export function isWeakMap(value: unknown): value is WeakMap<object, unknown> {
+export function isWeakMap(value: unknown): value is WeakMap<WeakKey, unknown> {
   return hasWeakMapBrand(value)
 }
 
@@ -24,6 +24,6 @@ export function isWeakMap(value: unknown): value is WeakMap<object, unknown> {
  * isWeakSet(new WeakSet())  // true
  * isWeakSet(new Set())      // false
  */
-export function isWeakSet(value: unknown): value is WeakSet<object> {
+export function isWeakSet(value: unknown): value is WeakSet<WeakKey> {
   return hasWeakSetBrand(value)
 }
